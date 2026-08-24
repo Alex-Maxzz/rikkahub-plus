@@ -18,13 +18,28 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 
 // 更新源已从官方服务器切到本仓库：发新版时同步更新仓库根目录 update.json 并发布 GitHub Release
-private const val API_URL = "https://raw.githubusercontent.com/heikeyangle-code/rikkahub-plus/mingli2/update.json"
+// 自构建版（改包名共存）：禁用应用内更新检查，避免下载到原包名APK导致安装失败；更新请手动跟进上游release
+private const val API_URL = ""
 
 class UpdateChecker(private val client: OkHttpClient) {
     private val json = Json { ignoreUnknownKeys = true }
 
     fun checkUpdate(): Flow<UiState<UpdateInfo>> = flow {
         emit(UiState.Loading)
+        // 自构建版：直接报告"已是最新"，不发起网络请求
+        if (API_URL.isBlank()) {
+            emit(
+                UiState.Success(
+                    UpdateInfo(
+                        version = BuildConfig.VERSION_NAME,
+                        publishedAt = "",
+                        changelog = "自构建版（改包名共存），应用内更新已禁用",
+                        downloads = emptyList()
+                    )
+                )
+            )
+            return@flow
+        }
         emit(
             UiState.Success(
                 data = try {
