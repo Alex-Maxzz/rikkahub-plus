@@ -1,0 +1,31 @@
+name: Publish Coexist APK Release
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Download build artifact
+        run: gh run download 32699868387 --repo Alex-Maxzz/rikkahub-plus --name rikkahub-plus-fresh -D apk
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Find arm64 APK
+        id: find
+        run: |
+          f=$(find apk -name "*arm64*" -o -name "*.apk" | grep -i arm64 | head -1)
+          [ -z "$f" ] && f=$(find apk -name "*.apk" | head -1)
+          echo "file=$f" >> $GITHUB_OUTPUT
+          echo "name=$(basename "$f")" >> $GITHUB_OUTPUT
+
+      - name: Create Release and Upload
+        run: |
+          gh release create coexist-2.4.6 "${{ steps.find.outputs.file }}#${{ steps.find.outputs.name }}" \
+            --title "共存版 Rikka+ 2.4.6" \
+            --notes "包名 me.rerere.rikkahub.plus（可与官方原版共存）；已摘除Firebase遥测；应用内更新已禁用。基于上游 heikeyangle-code/rikkahub-plus 2.4.6。"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
