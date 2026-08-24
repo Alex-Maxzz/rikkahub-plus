@@ -25,6 +25,7 @@ jobs:
       - name: Create Release and Upload
         run: |
           gh release create coexist-2.4.6 "${{ steps.find.outputs.file }}#${{ steps.find.outputs.name }}" \
+            --repo Alex-Maxzz/rikkahub-plus \
             --title "共存版 Rikka+ 2.4.6" \
             --notes "包名 me.rerere.rikkahub.plus（可与官方原版共存）；已摘除Firebase遥测；应用内更新已禁用。基于上游 heikeyangle-code/rikkahub-plus 2.4.6。"
         env:
